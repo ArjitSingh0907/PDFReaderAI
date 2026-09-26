@@ -3,6 +3,7 @@ pypdf2
 langchain
 langchain-community
 langchain-text-splitters
-langchain-google-genai
+langchain-google-genai>=2.0.0
 python-dotenv
 faiss-cpu
+google-generativeai>=0.7.0
