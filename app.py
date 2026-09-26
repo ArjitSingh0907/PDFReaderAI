@@ -56,8 +56,8 @@ def format_docs(docs):
 
 def get_qa_chain():
     llm = ChatGroq(
-        model="llama3-8b-8192",  # free, fast, excellent
-        temperature=0,
+    model="llama-3.1-8b-instant",
+    temperature=0,
     )
     prompt = ChatPromptTemplate.from_messages([
         (
