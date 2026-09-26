@@ -57,9 +57,10 @@ def format_docs(docs):
 def get_qa_chain():
     # Pass the API key explicitly to the chat model
     llm = ChatGoogleGenerativeAI(
-        model="gemini-1.5-flash",
-        temperature=0,
-        google_api_key=GOOGLE_API_KEY
+    model="gemini-pro",  # change from gemini-1.5-flash to gemini-pro
+    temperature=0,
+    google_api_key=GOOGLE_API_KEY,
+    convert_system_message_to_human=True  # add this too
     )
     prompt = ChatPromptTemplate.from_messages([
         (
