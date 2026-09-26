@@ -43,9 +43,10 @@ def get_text_chunks(text):
 def get_vectorstore(text_chunks):
     # Pass the API key explicitly to prevent authentication discovery issues
     embeddings = GoogleGenerativeAIEmbeddings(
-        model="text-embedding-004",
-        google_api_key=GOOGLE_API_KEY
-    )
+    model="models/text-embedding-004",  # add "models/" prefix
+    google_api_key=GOOGLE_API_KEY,
+    client_options={"api_endpoint": "generativelanguage.googleapis.com"}
+)
     vectorstore = FAISS.from_texts(texts=text_chunks, embedding=embeddings)
     return vectorstore
 
