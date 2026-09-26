@@ -4,7 +4,7 @@ from dotenv import load_dotenv
 from PyPDF2 import PdfReader
 
 from langchain_text_splitters import CharacterTextSplitter
-from langchain_google_genai import ChatGoogleGenerativeAI
+from langchain_groq import ChatGroq
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
@@ -55,12 +55,9 @@ def format_docs(docs):
 
 
 def get_qa_chain():
-    # Pass the API key explicitly to the chat model
-    llm = ChatGoogleGenerativeAI(
-    model="gemini-pro",  # change from gemini-1.5-flash to gemini-pro
-    temperature=0,
-    google_api_key=GOOGLE_API_KEY,
-    convert_system_message_to_human=True  # add this too
+    llm = ChatGroq(
+        model="llama3-8b-8192",  # free, fast, excellent
+        temperature=0,
     )
     prompt = ChatPromptTemplate.from_messages([
         (
