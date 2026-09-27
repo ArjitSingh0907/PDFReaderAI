@@ -11,9 +11,55 @@
 ![FAISS](https://img.shields.io/badge/FAISS-0467DF?style=for-the-badge&logo=meta&logoColor=white)
 ![HuggingFace](https://img.shields.io/badge/HuggingFace-FFD21E?style=for-the-badge&logo=huggingface&logoColor=black)
 
+### 🚀 [**Live Demo → studypdfai.streamlit.app**](https://studypdfai.streamlit.app/)
+
 > A **Retrieval-Augmented Generation (RAG)** powered chatbot that ingests multiple PDFs, builds a semantic vector index, and answers your questions with context-aware, conversation-history-aware responses — all running locally with zero OpenAI costs.
 
 </div>
+
+---
+
+## 🎬 App Walkthrough
+
+Here's exactly what happens at each step when you run StudyBuddy:
+
+### Step 1 — Upload your PDF(s)
+
+Upload one or more PDF files using the sidebar. Supports up to 200MB per file and multiple PDFs at once.
+
+![Step 1 - Upload](screenshots/01_upload.png)
+
+---
+
+### Step 2 — Click Process & Wait
+
+Hit the **Process** button. The app extracts text, splits it into chunks, generates embeddings using HuggingFace MiniLM, and indexes everything into FAISS — all locally.
+
+![Step 2 - Processing](screenshots/02_processing.png)
+
+---
+
+### Step 3 — Documents Ready!
+
+A green success message confirms your PDFs are indexed and the chatbot is ready. The vector store is now live in memory.
+
+![Step 3 - Processed](screenshots/03_processed.png)
+
+---
+
+### Step 4 — Ask Your First Question
+
+Type any question about your documents. The app retrieves the most relevant chunks via semantic search, builds a context-aware prompt, and generates a grounded answer via Groq.
+
+![Step 4 - First Question](screenshots/04_first_question.png)
+
+---
+
+### Step 5 — Full Multi-Turn Conversation
+
+Ask follow-up questions! The app maintains full chat history across turns — each new question is answered with both retrieved context and the full conversation so far.
+
+![Step 5 - Conversation](screenshots/05_conversation.png)
 
 ---
 
@@ -228,13 +274,12 @@ retriever   = vectorstore.as_retriever()
   Query vector Q = [0.21, -0.43, 0.87, ...]
 
   FAISS computes cosine similarity between Q and every stored chunk vector:
-  
+
   Chunk 1 similarity: 0.92  ← most relevant ✅
   Chunk 2 similarity: 0.87  ← relevant ✅
   Chunk 3 similarity: 0.21  ← not relevant ❌
   Chunk 4 similarity: 0.19  ← not relevant ❌
-  ...
-  
+
   Returns Top-K (default: 4) most similar chunks
 ```
 
@@ -258,8 +303,6 @@ ChatPromptTemplate.from_messages([
 | `chat_history` | Multi-turn memory | All previous Human+AI messages |
 | `human` | Current query | The user's latest question |
 
-**Why separate context from system prompt?** It keeps the instructions clean and makes the context block easy to swap or update without breaking the instruction logic.
-
 ---
 
 ### 6. 🤖 LLM — Groq + LPU Inference
@@ -270,17 +313,17 @@ ChatGroq(model="openai/gpt-oss-20b", temperature=0)
 
 **Why Groq?** Groq runs inference on custom LPU (Language Processing Unit) hardware — purpose-built for transformer inference. This gives 5–10× faster responses than GPU-based APIs, with generous free tier limits.
 
-**Why `temperature=0`?** Temperature controls randomness. At 0, the model is deterministic and picks the highest-probability token every time — ideal for factual Q&A where you want consistent, accurate answers, not creative variation.
+**Why `temperature=0`?** Temperature controls randomness. At 0, the model is deterministic and picks the highest-probability token every time — ideal for factual Q&A.
 
 ---
 
-### 7. 🔗 LangChain Chain — LCEL (LangChain Expression Language)
+### 7. 🔗 LangChain Chain — LCEL
 
 ```python
 chain = prompt | llm | StrOutputParser()
 ```
 
-**What is LCEL?** The `|` pipe operator chains components like Unix pipes. Data flows left → right:
+**What is LCEL?** The `|` pipe operator chains components like Unix pipes:
 
 ```
   prompt  ──|──►  llm  ──|──►  StrOutputParser
@@ -289,8 +332,6 @@ chain = prompt | llm | StrOutputParser()
   input dict into              text from the
   a ChatPromptValue            AIMessage object
 ```
-
-This is cleaner, more composable, and easier to debug than legacy `LLMChain`.
 
 ---
 
@@ -301,9 +342,7 @@ st.session_state.chat_history.append(HumanMessage(content=question))
 st.session_state.chat_history.append(AIMessage(content=answer))
 ```
 
-**How multi-turn memory works:** After every Q&A pair, both messages are appended to `chat_history`. On the next question, this entire history is injected into `MessagesPlaceholder("chat_history")` in the prompt — giving the LLM full conversation context.
-
-**Why Streamlit session_state?** Streamlit reruns the entire script on every interaction. `session_state` persists data across reruns, acting as the application's memory store.
+After every Q&A pair, both messages are appended to `chat_history`. On the next question, this entire history is injected into the prompt — giving the LLM full conversation context across multiple turns.
 
 ---
 
@@ -319,7 +358,7 @@ st.session_state.chat_history.append(AIMessage(content=answer))
 | **Orchestration** | LangChain (LCEL) | Chain prompt → LLM → parser |
 | **LLM** | Groq (`openai/gpt-oss-20b`) | Generate context-aware answers |
 | **Env Management** | python-dotenv | Load API keys from `.env` |
-| **UI Templates** | Custom HTML/CSS | Styled chat bubbles with SVG avatars |
+| **UI Templates** | Custom HTML/CSS + SVG | Styled chat bubbles with avatars |
 
 ---
 
@@ -340,9 +379,15 @@ StudyBuddy/
 │   ├── bot_template       # Siri-style aurora SVG avatar + message
 │   └── user_template      # Dotted person SVG avatar + message
 │
+├── screenshots/           # App walkthrough screenshots
+│   ├── 01_upload.png
+│   ├── 02_processing.png
+│   ├── 03_processed.png
+│   ├── 04_first_question.png
+│   └── 05_conversation.png
+│
 ├── .env                   # API keys (never commit this!)
-│   ├── GROQ_API_KEY       # From console.groq.com
-│   └── GOOGLE_API_KEY     # (Optional) From aistudio.google.com
+│   └── GROQ_API_KEY       # From console.groq.com
 │
 ├── requirements.txt       # Python dependencies
 ├── .gitignore             # Excludes venv/, .env, __pycache__
@@ -361,8 +406,8 @@ StudyBuddy/
 
 **1. Clone the repository**
 ```bash
-git clone https://github.com/YOUR_USERNAME/StudyBuddy.git
-cd StudyBuddy
+git clone https://github.com/ArjitSingh0907/PDFReaderAI.git
+cd PDFReaderAI
 ```
 
 **2. Create and activate a virtual environment**
@@ -392,14 +437,13 @@ GROQ_API_KEY=gsk_your_key_here
 streamlit run app.py
 ```
 
-**6. Use it**
-- Upload one or more PDFs in the sidebar
-- Click **Process**
-- Ask any question in the chat input
+**6. Or use the live deployment**
+
+🌐 **[studypdfai.streamlit.app](https://studypdfai.streamlit.app/)**
 
 ---
 
-## 🔮 How the Full Flow Connects (End-to-End)
+## 🔮 End-to-End Flow Summary
 
 ```
 User uploads PDF(s)
@@ -463,6 +507,8 @@ MIT License — free to use, modify, and distribute.
 <div align="center">
 
 Built with ❤️ using LangChain, Groq, FAISS, and Streamlit
+
+🌐 **[Try it live → studypdfai.streamlit.app](https://studypdfai.streamlit.app/)**
 
 ⭐ Star this repo if you found it helpful!
 
