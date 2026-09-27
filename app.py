@@ -17,7 +17,7 @@ from htmlTemplates import css, bot_template, user_template
 
 # Force reload the .env file to ensure the API key is read into memory
 load_dotenv(override=True)
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
 
 def get_pdf_text(pdf_docs):
@@ -109,9 +109,9 @@ def main():
     st.write(css, unsafe_allow_html=True)
 
     # Diagnostic check for API key
-    if not GOOGLE_API_KEY:
-        st.error("GOOGLE_API_KEY is missing or empty. Please check your .env file and restart the server.")
-        return
+    if not GROQ_API_KEY:
+        st.error("GROQ_API_KEY is missing or empty. Please check your .env file and restart the server.")
+    return
 
     if "conversation" not in st.session_state:
         st.session_state.conversation = None
