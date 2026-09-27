@@ -6,7 +6,6 @@ from PyPDF2 import PdfReader
 from langchain_text_splitters import CharacterTextSplitter
 from langchain_groq import ChatGroq
 from langchain_community.embeddings import HuggingFaceEmbeddings
-from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_community.vectorstores import FAISS
 
 from langchain_core.prompts import ChatPromptTemplate, MessagesPlaceholder
@@ -15,7 +14,6 @@ from langchain_core.output_parsers import StrOutputParser
 
 from htmlTemplates import css, bot_template, user_template
 
-# Force reload the .env file to ensure the API key is read into memory
 load_dotenv(override=True)
 GROQ_API_KEY = os.getenv("GROQ_API_KEY")
 
@@ -44,7 +42,7 @@ def get_text_chunks(text):
 
 def get_vectorstore(text_chunks):
     embeddings = HuggingFaceEmbeddings(
-        model_name="all-MiniLM-L6-v2"  # free, fast, local — no API needed
+        model_name="all-MiniLM-L6-v2"
     )
     vectorstore = FAISS.from_texts(texts=text_chunks, embedding=embeddings)
     return vectorstore
@@ -58,6 +56,7 @@ def get_qa_chain():
     llm = ChatGroq(
         model="openai/gpt-oss-20b",
         temperature=0,
+        api_key=GROQ_API_KEY
     )
     prompt = ChatPromptTemplate.from_messages([
         (
@@ -75,22 +74,18 @@ def get_qa_chain():
 
 
 def handle_userinput(user_question):
-    # 1. Retrieve relevant chunks from FAISS
     docs = st.session_state.retriever.invoke(user_question)
     context = format_docs(docs)
 
-    # 2. Invoke the chain with question, history, and context
     answer = st.session_state.conversation.invoke({
         "input": user_question,
         "chat_history": st.session_state.chat_history,
         "context": context
     })
 
-    # 3. Save to chat history
     st.session_state.chat_history.append(HumanMessage(content=user_question))
     st.session_state.chat_history.append(AIMessage(content=answer))
 
-    # 4. Render styled chat boxes
     for message in st.session_state.chat_history:
         if isinstance(message, HumanMessage):
             st.write(
@@ -108,10 +103,10 @@ def main():
     st.set_page_config(page_title="Chat with Multiple PDFs", page_icon=":books:")
     st.write(css, unsafe_allow_html=True)
 
-    # Diagnostic check for API key
+    # ✅ return is INSIDE the if block — only exits if key is truly missing
     if not GROQ_API_KEY:
         st.error("GROQ_API_KEY is missing or empty. Please check your .env file and restart the server.")
-    return
+        return
 
     if "conversation" not in st.session_state:
         st.session_state.conversation = None
