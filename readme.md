@@ -1,6 +1,7 @@
+
 <div align="center">
 
-# 📚 StudyBuddy — Multi-PDF RAG Chatbot
+# 📚 StudyBuddy — Multi-PDF RAG AI Chatbot
 
 **Ask anything. From any PDF. Instantly.**
 
