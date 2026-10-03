@@ -1,4 +1,3 @@
-
 <div align="center">
 
 # 📚 StudyBuddy — Multi-PDF RAG AI Chatbot

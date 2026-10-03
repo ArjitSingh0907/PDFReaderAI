@@ -1,4 +1,3 @@
-//these contains all the necessary stack req to make this project work
 streamlit
 pypdf2
 langchain
