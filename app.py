@@ -142,6 +142,5 @@ def main():
                     st.session_state.conversation = get_qa_chain()
                     st.success("Documents processed successfully! You can now ask questions.")
 
-
 if __name__ == '__main__':
     main()
